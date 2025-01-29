@@ -38,7 +38,7 @@ The Adaptive Cruise Control system is designed to maintain a safe distance from 
 
 1. Clone this repository to your local system:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/gopikbv/ADAS
    ```
 
 2. Open the **CANoe_Configuration** folder and load the CANoe project file.
