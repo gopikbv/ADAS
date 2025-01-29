@@ -1,0 +1,94 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ICM ECM BCM ACC
+VAL_TABLE_ Vt_Brake_Decel_Request 1 "Applied" 0 "Not Applied" ;
+VAL_TABLE_ Vt_ACC_Driver_Information 4 "ACC Fault" 3 "ACC Active" 2 "ACC Standby" 1 "ACC ON" 0 "ACC OFF" ;
+VAL_TABLE_ Vt_Brake_Switch_1 1 "Pressed" 0 "Not_Pressed" ;
+VAL_TABLE_ Vt_Cruise_Switch_Request 7 "None" 6 "Time Gap +" 5 "Time gap -" 4 "Resume" 3 "Coast" 2 "Set or Accel" 1 "ON" 0 "OFF" ;
+
+
+BO_ 288 ICMInfo: 1 ICM
+ SG_ CruiseSwitchRequest : 1|3@1+ (1,0) [0|0] ""  ACC
+ SG_ Brake_Switch_1 : 0|1@1+ (1,0) [0|0] ""  ACC
+
+BO_ 100 ECMInfo: 8 ECM
+ SG_ Brake_Switch_2 : 0|1@1+ (1,0) [0|0] ""  ACC
+
+BO_ 152 BCMInfo: 8 BCM
+ SG_ VehicleSpeed : 0|8@1+ (1,0) [0|0] "km/h"  ACC
+
+BO_ 816 ACCInfo: 8 ACC
+ SG_ TargetSpeed : 8|8@1+ (1,0) [0|0] "km/h"  ECM
+ SG_ BrakeDecelRequest : 6|1@1+ (1,0) [0|0] ""  BCM
+ SG_ ACC_State : 3|3@1+ (1,0) [0|0] ""  ECM,BCM
+ SG_ ACC_Driver_Information_Msg : 0|3@1+ (1,0) [0|0] ""  ICM
+
+
+
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_ BU_  "ILUsed" ENUM  "NO","YES";
+BA_DEF_ SG_  "GenSigStartValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","Event","Event+Periodic";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_  "MultiplexExtEnabled" ENUM  "No","Yes";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "NodeLayerModules" "CANoeILNLVector.dll";
+BA_DEF_DEF_  "ILUsed" "YES";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenMsgSendType" "Cyclic";
+BA_DEF_DEF_  "GenMsgCycleTime" 50;
+BA_DEF_DEF_  "MultiplexExtEnabled" "No";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "NodeLayerModules" BU_ ICM "CANoeILNLVector.dll";
+BA_ "ILUsed" BU_ ICM 1;
+BA_ "NodeLayerModules" BU_ ECM "CANoeILNLVector.dll";
+BA_ "ILUsed" BU_ ECM 1;
+BA_ "NodeLayerModules" BU_ BCM "CANoeILNLVector.dll";
+BA_ "ILUsed" BU_ BCM 1;
+BA_ "NodeLayerModules" BU_ ACC "CANoeILNLVector.dll";
+BA_ "ILUsed" BU_ ACC 1;
+BA_ "GenMsgCycleTime" BO_ 288 100;
+BA_ "GenMsgCycleTime" BO_ 100 150;
+BA_ "GenMsgCycleTime" BO_ 152 120;
+BA_ "GenMsgCycleTime" BO_ 816 100;
+BA_ "GenSigStartValue" SG_ 288 CruiseSwitchRequest 7;
+VAL_ 288 CruiseSwitchRequest 7 "None" 6 "Time Gap +" 5 "Time gap -" 4 "Resume" 3 "Coast" 2 "Set or Accel" 1 "ON" 0 "OFF" ;
+VAL_ 288 Brake_Switch_1 1 "Pressed" 0 "Not_Pressed" ;
+VAL_ 100 Brake_Switch_2 1 "Pressed" 0 "Not_Pressed" ;
+VAL_ 816 BrakeDecelRequest 1 "Applied" 0 "Not Applied" ;
+VAL_ 816 ACC_State 4 "ACC Fault" 3 "ACC Active" 2 "ACC Standby" 1 "ACC ON" 0 "ACC OFF" ;
+VAL_ 816 ACC_Driver_Information_Msg 4 "ACC Fault" 3 "ACC Active" 2 "ACC Standby" 1 "ACC ON" 0 "ACC OFF" ;
+

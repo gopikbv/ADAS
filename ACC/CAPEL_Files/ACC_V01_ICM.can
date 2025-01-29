@@ -1,0 +1,26 @@
+﻿/*@!Encoding:65001*/
+on message ACCInfo
+{
+  switch(this.ACC_Driver_Information_Msg)
+  {
+    case 0:  //ACC OFF
+        sysSetVariableString(sysvar::ACC_DriverInfo,"ACC OFF");
+        break;
+    case 1:  //ACC ON
+        sysSetVariableString(sysvar::ACC_DriverInfo,"ACC ON");
+        break;
+    case 2:  //ACC Standby
+        sysSetVariableString(sysvar::ACC_DriverInfo,"ACC Standby");
+        break;
+    case 3: //ACC Active
+        sysSetVariableString(sysvar::ACC_DriverInfo,"ACC Active");
+        break;
+    case 4:  //ACC Fault
+        sysSetVariableString(sysvar::ACC_DriverInfo,"ACC Fault");
+        break;
+    case 5:  //Driver Intervention
+        sysSetVariableString(sysvar::ACC_DriverInfo,"Driver Intervention Required");
+        break;
+  }
+}
+

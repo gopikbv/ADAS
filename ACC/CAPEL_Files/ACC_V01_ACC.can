@@ -1,0 +1,139 @@
+﻿/*@!Encoding:65001*/
+variables
+{
+  int BrakeSwitch1_Status;
+  int BrakeSwitch2_Status;
+  int Vehicle_Speed;
+  int Target_Speed;
+  int Set_Speed=0;
+  timer t1;
+}
+
+on timer t1
+{
+  if((getsignal(ACCInfo::ACC_State)==3)&& (BrakeSwitch1_Status==0)&& (BrakeSwitch2_Status==0))
+  {
+    if(Vehicle_Speed<40)
+    {
+      setsignal(ACCInfo::ACC_State,2);
+      setsignal(ACCInfo::ACC_Driver_Information_Msg,5);
+    }
+  }
+  if((getsignal(ACCInfo::ACC_State)==3)&& (BrakeSwitch1_Status==0)&& (BrakeSwitch2_Status==0)&&(Vehicle_Speed>=40))
+      {
+        if(@sysvar::ForwardVehicleStatus==0)
+        {
+          if(Set_Speed>0)
+          {
+            setsignal(ACCInfo::TargetSpeed,Set_Speed);
+          }
+          else
+          {
+           Set_Speed=Vehicle_Speed;
+           setsignal(ACCInfo::TargetSpeed,Set_Speed);
+          }
+        }
+        
+      }
+  if(getSignal(ACCInfo::TargetSpeed)< Vehicle_Speed)
+  {
+    setSignal(ACCInfo::BrakeDecelRequest,1);
+  }
+  else
+  {
+    setSignal(ACCInfo::BrakeDecelRequest,0);
+  }
+  settimer(t1,1);
+}
+
+on start
+{
+  settimer(t1,1);
+}
+
+on message ICMInfo
+{
+  BrakeSwitch1_Status=this.Brake_Switch_1.phys;
+  if(this.Brake_Switch_1.phys)
+  {
+    setsignal(ACCInfo::ACC_State,2);
+}
+  switch(this.CruiseSwitchRequest)
+  {
+    case 0: //off
+      setsignal(ACCInfo::ACC_State,0);
+      setsignal(ACCInfo::ACC_Driver_Information_Msg,0);
+      break;
+    case 1: //on
+      if(@sysvar::ACC_Fault==0)
+      {
+      setsignal(ACCInfo::ACC_State,2);
+      setsignal(ACCInfo::ACC_Driver_Information_Msg,2);
+      }
+      break;
+    case 2: //standby
+      if((getsignal(ACCInfo::ACC_State)==2)&& (BrakeSwitch1_Status==0)&& (BrakeSwitch2_Status==0)&&(Vehicle_Speed>=40))
+      {
+        
+        setsignal(ACCInfo::ACC_State,3);
+        setsignal(ACCInfo::ACC_Driver_Information_Msg,3);
+      }
+      break;
+    case 3: //Coast
+      setsignal(ACCInfo::ACC_State,2);
+      setsignal(ACCInfo::ACC_Driver_Information_Msg,2);
+      break;
+    case 4:  //Resume
+      if((getsignal(ACCInfo::ACC_State)==2)&& (BrakeSwitch1_Status==0)&& (BrakeSwitch2_Status==0)&&(Vehicle_Speed>=40))
+      {
+        
+        setsignal(ACCInfo::ACC_State,3);
+        setsignal(ACCInfo::ACC_Driver_Information_Msg,3);
+      }
+      break;
+    case 5: //Time Gap -
+      @sysvar::TimeGap=@sysvar::TimeGap-(1.0/3600);
+      break;
+    case 6: //Time Gap +
+      @sysvar::TimeGap=@sysvar::TimeGap+(1.0/3600);
+      break;
+  }
+}
+
+on message ECMInfo
+{
+  BrakeSwitch2_Status=this.Brake_Switch_2.phys;
+  if(this.Brake_Switch_2.phys)
+  {
+    setsignal(ACCInfo::ACC_State,2);
+  }
+}
+
+on message BCMInfo
+{
+  Vehicle_Speed=this.VehicleSpeed.phys;
+}
+
+on sysvar Ignition_State
+{
+  if(@sysvar::Ignition_State==0)
+  {
+    setsignal(ACCInfo::ACC_State,0);
+    setsignal(ACCInfo::ACC_Driver_Information_Msg,0); 
+  }
+}
+
+on sysvar ForwardVehicleStatus
+{
+  if(@sysvar::ForwardVehicleStatus)
+  {
+    Target_Speed=@sysvar::Clearance/@sysvar::TimeGap;
+    setSignal(ACCInfo::TargetSpeed,Target_Speed);
+  }
+  else
+  {
+    Target_Speed=Set_Speed;
+    setSignal(ACCInfo::TargetSpeed,Target_Speed);
+  }
+}
+

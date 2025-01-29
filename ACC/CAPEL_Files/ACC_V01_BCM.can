@@ -1,0 +1,39 @@
+﻿/*@!Encoding:65001*/
+variables
+{
+  timer _signal_state;
+  int BreakDecelState;
+  int AccState;
+}
+
+on start
+{
+  setTimer(_signal_state,1);
+}
+
+on timer _signal_state
+{
+  if((AccState==3)&&(BreakDecelState==0)&&(@sysvar::ForwardVehicleStatus==0))
+  {
+    if(getsignal(BCMInfo::VehicleSpeed)<getsignal(ACCInfo::TargetSpeed))
+    {
+      setsignal(BCMInfo::VehicleSpeed,getSignal(BCMInfo::VehicleSpeed)+5); 
+    }
+  }
+  else if((AccState==3)&&(BreakDecelState==1)&&(@sysvar::ForwardVehicleStatus==1))
+  {
+    if(getsignal(BCMInfo::VehicleSpeed)>getsignal(ACCInfo::TargetSpeed))
+    {
+      setsignal(BCMInfo::VehicleSpeed,getSignal(BCMInfo::VehicleSpeed)-5); 
+    }
+  }
+  setTimer(_signal_state,1);
+}
+
+on message ACCInfo
+{
+  BreakDecelState =this.BrakeDecelRequest;
+  AccState=this.ACC_State;
+  
+}
+
